@@ -53,8 +53,8 @@
     to{opacity:1;transform:translateY(0);}
   }
   @keyframes floatY{
-    0%,100%{transform:translateY(0) rotate(-1.2deg);}
-    50%{transform:translateY(-14px) rotate(1deg);}
+    0%,100%{transform:translateY(0) rotate(-1.5deg);}
+    50%{transform:translateY(-22px) rotate(1.5deg);}
   }
   @keyframes glitchFlicker{
     0%,89%,100%{ text-shadow:0 0 30px rgba(124,58,237,0.6); transform:translate(0,0); opacity:1; }
@@ -552,7 +552,10 @@
 
   function glitchEl(el, onDone){
     el.classList.add('glitch-in');
-    setTimeout(onDone, 260);
+    setTimeout(function(){
+      if(el.tagName === 'H1'){ el.classList.remove('glitch-in'); }
+      onDone();
+    }, 260);
   }
 
   let cursor = 0;
@@ -600,24 +603,43 @@
     }
   }
 
-  if('IntersectionObserver' in window){
-    const io = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        const item = items.find(function(it){ return it.el === entry.target; });
-        if(!item) return;
-        if(entry.isIntersecting){
-          if(!item.ready){
-            item.ready = true;
-            advance();
-          } else if(item.everShown && !item.playing){
-            replay(item);
-          }
-        } else if(item.everShown && !item.playing){
-          resetEl(item.el, item.type);
-        }
-      });
-    }, {threshold:0.2});
-    items.forEach(function(item){ io.observe(item.el); });
+  function tryAdvanceForward(){
+    if(running) return;
+    const item = items[cursor];
+    if(!item) return;
+    const rect = item.el.getBoundingClientRect();
+    if(rect.top < window.innerHeight * 0.85){
+      item.ready = true;
+      advance();
+    }
+  }
+
+  function tryRetreatBackward(){
+    while(cursor > 0){
+      const item = items[cursor - 1];
+      if(item.playing) break;
+      const rect = item.el.getBoundingClientRect();
+      if(rect.top <= window.innerHeight) break;
+      resetEl(item.el, item.type);
+      item.everShown = false;
+      item.done = false;
+      item.ready = false;
+      cursor--;
+    }
+  }
+
+  if('requestAnimationFrame' in window){
+    let lastScrollY = window.scrollY;
+    function onScroll(){
+      const y = window.scrollY;
+      const dir = y > lastScrollY ? 'down' : (y < lastScrollY ? 'up' : null);
+      lastScrollY = y;
+      if(dir !== 'up'){ tryAdvanceForward(); }
+      if(dir !== 'down'){ tryRetreatBackward(); }
+    }
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    onScroll();
   } else {
     items.forEach(function(item){
       if(item.type === 'type'){
