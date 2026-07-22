@@ -64,7 +64,7 @@
   }
 
   .glitch-in{
-    animation: glitchReveal .28s steps(1,end) forwards;
+    animation: glitchReveal .14s steps(1,end) forwards;
   }
   @keyframes glitchReveal{
     0%{ opacity:0; transform:translate(0,0); clip-path:inset(0 0 100% 0); text-shadow:none; }
@@ -145,7 +145,7 @@
     text-transform:uppercase;
     color:#f4f4f6;
     opacity:0;
-    animation: glitchFlicker 6s ease-in-out 2s infinite;
+    animation: glitchFlicker 6s ease-in-out 2s infinite backwards;
   }
   h1 span{
     display:block;
@@ -255,8 +255,8 @@
   .term{
     display:flex;gap:20px;padding:9px 0;border-bottom:1px solid rgba(163,230,53,0.15);
   }
-  .term-label{width:180px;flex-shrink:0;color:var(--green);font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
-  .term-value{color:var(--text);font-size:13px;line-height:1.4;text-align:left;}
+  .term-label{width:180px;flex-shrink:0;color:var(--green);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:0;}
+  .term-value{color:var(--text);font-size:13px;line-height:1.4;text-align:left;opacity:0;}
 
   .timeline{max-width:760px;margin:36px auto 0;text-align:left;}
   .step{display:flex;gap:24px;padding:18px 0;border-left:2px solid rgba(163,230,53,0.3);padding-left:24px;margin-left:8px;position:relative;}
@@ -493,7 +493,7 @@
 (function(){
   const nodeList = document.querySelectorAll('.eyebrow, h1, .vol, .hero-sub, .section-title, .section-heading, .concept p, .term-label, .term-value, .legacy-card, .pill');
   const items = Array.from(nodeList).map(function(el){
-    return { el: el, type: (el.tagName === 'H1' || el.classList.contains('section-heading') || el.classList.contains('legacy-card') || el.classList.contains('pill')) ? 'glitch' : 'type', ready: false, done: false };
+    return { el: el, type: (el.tagName === 'H1' || el.classList.contains('section-heading') || el.classList.contains('legacy-card') || el.classList.contains('pill') || el.classList.contains('term-label') || el.classList.contains('term-value')) ? 'glitch' : 'type', ready: false, done: false };
   });
 
   function computeLines(el, text){
@@ -555,7 +555,7 @@
     setTimeout(function(){
       if(el.tagName === 'H1'){ el.classList.remove('glitch-in'); }
       onDone();
-    }, 260);
+    }, 130);
   }
 
   let cursor = 0;
