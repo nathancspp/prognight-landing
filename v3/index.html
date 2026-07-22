@@ -491,6 +491,11 @@
 
 <script>
 (function(){
+  const nodeList = document.querySelectorAll('.eyebrow, h1, .vol, .hero-sub, .section-title, .section-heading, .concept p, .term-label, .term-value, .legacy-card, .pill');
+  const items = Array.from(nodeList).map(function(el){
+    return { el: el, type: (el.tagName === 'H1' || el.classList.contains('section-heading') || el.classList.contains('legacy-card') || el.classList.contains('pill')) ? 'glitch' : 'type', ready: false, done: false };
+  });
+
   function computeLines(el, text){
     if(!text) return [''];
     el.textContent = text;
@@ -518,196 +523,111 @@
     return lines.length ? lines : [text];
   }
 
-  /* ---------- HERO: entrada por tempo (igual v1) ---------- */
-  (function(){
-    const nodeList = document.querySelectorAll('.hero .eyebrow, .hero h1, .hero .vol, .hero .hero-sub, .hero .pill');
-    const items = Array.from(nodeList).map(function(el){
-      return { el: el, type: (el.tagName === 'H1' || el.classList.contains('pill')) ? 'glitch' : 'type', ready: false, done: false };
-    });
-
-    items.forEach(function(item){
-      if(item.type === 'type'){
-        const text = item.el.textContent;
-        const lines = computeLines(item.el, text);
-        item.el.dataset.lines = JSON.stringify(lines);
-        const cs = getComputedStyle(item.el);
-        let lh = parseFloat(cs.lineHeight);
-        if(isNaN(lh)) lh = parseFloat(cs.fontSize) * 1.2;
-        item.el.style.minHeight = (lh * lines.length) + 'px';
-      }
-    });
-
-    function typeEl(el, speed, onDone){
-      const lines = JSON.parse(el.dataset.lines || '[""]');
-      el.classList.add('typing');
-      let li = 0;
-      (function step(){
-        if(li >= lines.length){ el.classList.remove('typing'); onDone(); return; }
-        const lineSpan = document.createElement('span');
-        lineSpan.textContent = lines[li];
-        el.appendChild(lineSpan);
-        li++;
-        if(li < lines.length){ el.appendChild(document.createElement('br')); }
-        setTimeout(step, speed);
-      })();
+  items.forEach(function(item){
+    if(item.type === 'type'){
+      const text = item.el.textContent;
+      const lines = computeLines(item.el, text);
+      item.el.dataset.lines = JSON.stringify(lines);
+      const cs = getComputedStyle(item.el);
+      let lh = parseFloat(cs.lineHeight);
+      if(isNaN(lh)) lh = parseFloat(cs.fontSize) * 1.2;
+      item.el.style.minHeight = (lh * lines.length) + 'px';
     }
+  });
 
-    function glitchEl(el, onDone){
-      el.classList.add('glitch-in');
-      setTimeout(onDone, 260);
-    }
+  function typeEl(el, speed, onDone){
+    const lines = JSON.parse(el.dataset.lines || '[""]');
+    el.classList.add('typing');
+    let li = 0;
+    (function step(){
+      if(li >= lines.length){ el.classList.remove('typing'); onDone(); return; }
+      const lineSpan = document.createElement('span');
+      lineSpan.textContent = lines[li];
+      el.appendChild(lineSpan);
+      li++;
+      if(li < lines.length){ el.appendChild(document.createElement('br')); }
+      setTimeout(step, speed);
+    })();
+  }
 
-    let cursor = 0;
-    let running = false;
+  function glitchEl(el, onDone){
+    el.classList.add('glitch-in');
+    setTimeout(onDone, 260);
+  }
 
-    function resetEl(el, type){
-      el.classList.remove('typing');
-      if(type === 'type'){
-        el.textContent = '';
-      } else {
-        el.classList.remove('glitch-in');
-        void el.offsetWidth;
-      }
-    }
+  let cursor = 0;
+  let running = false;
 
-    function advance(){
-      if(running) return;
-      const item = items[cursor];
-      if(!item || !item.ready) return;
-      running = true;
-      const finish = function(){
-        item.done = true;
-        item.everShown = true;
-        item.playing = false;
-        running = false;
-        cursor++;
-        advance();
-      };
-      item.playing = true;
-      if(item.type === 'glitch'){
-        glitchEl(item.el, finish);
-      } else {
-        typeEl(item.el, 220, finish);
-      }
-    }
-
-    function replay(item){
-      if(item.playing) return;
-      item.playing = true;
-      const finish = function(){ item.playing = false; };
-      if(item.type === 'glitch'){
-        glitchEl(item.el, finish);
-      } else {
-        typeEl(item.el, 220, finish);
-      }
-    }
-
-    if('IntersectionObserver' in window){
-      const io = new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){
-          const item = items.find(function(it){ return it.el === entry.target; });
-          if(!item) return;
-          if(entry.isIntersecting){
-            if(!item.ready){
-              item.ready = true;
-              advance();
-            } else if(item.everShown && !item.playing){
-              replay(item);
-            }
-          } else if(item.everShown && !item.playing){
-            resetEl(item.el, item.type);
-          }
-        });
-      }, {threshold:0.2});
-      items.forEach(function(item){ io.observe(item.el); });
+  function resetEl(el, type){
+    el.classList.remove('typing');
+    if(type === 'type'){
+      el.textContent = '';
     } else {
-      items.forEach(function(item){
-        if(item.type === 'type'){
-          const lines = JSON.parse(item.el.dataset.lines || '[""]');
-          item.el.textContent = lines.join('\n');
-        } else {
-          item.el.style.opacity = '1';
+      el.classList.remove('glitch-in');
+      void el.offsetWidth;
+    }
+  }
+
+  function advance(){
+    if(running) return;
+    const item = items[cursor];
+    if(!item || !item.ready) return;
+    running = true;
+    const finish = function(){
+      item.done = true;
+      item.everShown = true;
+      item.playing = false;
+      running = false;
+      cursor++;
+      advance();
+    };
+    item.playing = true;
+    if(item.type === 'glitch'){
+      glitchEl(item.el, finish);
+    } else {
+      typeEl(item.el, 220, finish);
+    }
+  }
+
+  function replay(item){
+    if(item.playing) return;
+    item.playing = true;
+    const finish = function(){ item.playing = false; };
+    if(item.type === 'glitch'){
+      glitchEl(item.el, finish);
+    } else {
+      typeEl(item.el, 220, finish);
+    }
+  }
+
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        const item = items.find(function(it){ return it.el === entry.target; });
+        if(!item) return;
+        if(entry.isIntersecting){
+          if(!item.ready){
+            item.ready = true;
+            advance();
+          } else if(item.everShown && !item.playing){
+            replay(item);
+          }
+        } else if(item.everShown && !item.playing){
+          resetEl(item.el, item.type);
         }
       });
-    }
-  })();
-
-  /* ---------- RESTO DA PAGINA: scroll-scrub (preso ao mouse) ---------- */
-  (function(){
-    const nodeList = document.querySelectorAll('.section-title, .section-heading, .concept p, .term-label, .term-value, .legacy-card');
-
-    const glitchFrames = [
-      {offset:0,    opacity:0,   transform:'translate(0,0)',      clipPath:'inset(0 0 100% 0)',  textShadow:'none'},
-      {offset:0.08, opacity:1,   transform:'translate(-8px,3px)', clipPath:'inset(15% 0 35% 0)', textShadow:'4px 0 rgba(163,230,53,.9), -4px 0 rgba(124,58,237,.9)'},
-      {offset:0.16, opacity:0.2, transform:'translate(6px,-2px)', clipPath:'inset(55% 0 5% 0)',  textShadow:'-4px 0 rgba(163,230,53,.9), 4px 0 rgba(124,58,237,.9)'},
-      {offset:0.24, opacity:1,   transform:'translate(-5px,0)',   clipPath:'inset(10% 0 45% 0)', textShadow:'3px 0 rgba(163,230,53,.8), -3px 0 rgba(124,58,237,.8)'},
-      {offset:0.32, opacity:0.3, transform:'translate(4px,2px)',  clipPath:'inset(0 0 0 0)',     textShadow:'none'},
-      {offset:0.40, opacity:1,   transform:'translate(-3px,0)',   clipPath:'inset(0 0 0 0)',     textShadow:'-3px 0 rgba(163,230,53,.6), 3px 0 rgba(124,58,237,.6)'},
-      {offset:0.55, opacity:0.6, transform:'translate(2px,-1px)', clipPath:'inset(0 0 0 0)',     textShadow:'2px 0 rgba(163,230,53,.5), -2px 0 rgba(124,58,237,.5)'},
-      {offset:0.70, opacity:1,   transform:'translate(-1px,0)',   clipPath:'inset(0 0 0 0)',     textShadow:'1px 0 rgba(163,230,53,.35), -1px 0 rgba(124,58,237,.35)'},
-      {offset:1,    opacity:1,   transform:'translate(0,0)',      clipPath:'inset(0 0 0 0)',     textShadow:'none'}
-    ];
-    const GLITCH_DURATION = 1000;
-
-    const items = Array.from(nodeList).map(function(el){
-      const isGlitch = (el.tagName.toLowerCase() === 'h2' || el.classList.contains('section-heading') || el.classList.contains('legacy-card'));
-      const item = { el: el, type: isGlitch ? 'glitch' : 'type', progress: -1 };
-      if(isGlitch && 'animate' in el){
-        el.style.opacity = '0';
-        item.anim = el.animate(glitchFrames, {duration: GLITCH_DURATION, fill: 'both', easing: 'steps(1,end)'});
-        item.anim.pause();
-        item.anim.currentTime = 0;
-      } else if(!isGlitch) {
-        const text = el.textContent;
-        item.lines = computeLines(el, text);
-        const cs = getComputedStyle(el);
-        let lh = parseFloat(cs.lineHeight);
-        if(isNaN(lh)) lh = parseFloat(cs.fontSize) * 1.2;
-        el.style.minHeight = (lh * item.lines.length) + 'px';
+    }, {threshold:0.2});
+    items.forEach(function(item){ io.observe(item.el); });
+  } else {
+    items.forEach(function(item){
+      if(item.type === 'type'){
+        const lines = JSON.parse(item.el.dataset.lines || '[""]');
+        item.el.textContent = lines.join('\n');
+      } else {
+        item.el.style.opacity = '1';
       }
-      return item;
     });
-
-    function setTypeProgress(item, progress){
-      const count = Math.round(progress * item.lines.length);
-      if(count === item.shownCount) return;
-      item.shownCount = count;
-      if(count <= 0){
-        item.el.textContent = '';
-        return;
-      }
-      item.el.innerHTML = item.lines.slice(0, count).map(function(l){
-        return l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      }).join('<br>');
-    }
-
-    const START = 0.9;
-    const END = 0.42;
-
-    function update(){
-      const vh = window.innerHeight;
-      for(let i = 0; i < items.length; i++){
-        const item = items[i];
-        const rect = item.el.getBoundingClientRect();
-        const startY = vh * START;
-        const endY = vh * END;
-        let progress = (startY - rect.top) / (startY - endY);
-        if(progress < 0) progress = 0;
-        if(progress > 1) progress = 1;
-        if(progress === item.progress) continue;
-        item.progress = progress;
-        if(item.type === 'glitch'){
-          if(item.anim) item.anim.currentTime = progress * GLITCH_DURATION;
-        } else {
-          setTypeProgress(item, progress);
-        }
-      }
-    }
-
-    window.addEventListener('scroll', update, {passive:true});
-    window.addEventListener('resize', update);
-    update();
-  })();
+  }
 })();
 </script>
 </body>
