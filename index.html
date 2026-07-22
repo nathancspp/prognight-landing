@@ -254,7 +254,6 @@
   .terms{max-width:680px;margin:0;}
   .term{
     display:flex;gap:20px;padding:9px 0;border-bottom:1px solid rgba(163,230,53,0.15);
-    opacity:0;
   }
   .term-label{width:180px;flex-shrink:0;color:var(--green);font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
   .term-value{color:var(--text);font-size:13px;line-height:1.4;text-align:left;}
@@ -492,9 +491,9 @@
 
 <script>
 (function(){
-  const nodeList = document.querySelectorAll('.eyebrow, h1, .vol, .hero-sub, .section-title, .section-heading, .concept p, .term, .legacy-card, .pill');
+  const nodeList = document.querySelectorAll('.eyebrow, h1, .vol, .hero-sub, .section-title, .section-heading, .concept p, .term-label, .term-value, .legacy-card, .pill');
   const items = Array.from(nodeList).map(function(el){
-    return { el: el, type: (el.tagName === 'H1' || el.classList.contains('section-heading') || el.classList.contains('term') || el.classList.contains('legacy-card') || el.classList.contains('pill')) ? 'glitch' : 'type', ready: false, done: false };
+    return { el: el, type: (el.tagName === 'H1' || el.classList.contains('section-heading') || el.classList.contains('legacy-card') || el.classList.contains('pill')) ? 'glitch' : 'type', ready: false, done: false };
   });
 
   function computeLines(el, text){
