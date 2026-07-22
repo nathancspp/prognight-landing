@@ -660,6 +660,8 @@
       } else if(!isGlitch) {
         const text = el.textContent;
         item.lines = computeLines(el, text);
+        item.fullText = item.lines.join('
+');
         const cs = getComputedStyle(el);
         let lh = parseFloat(cs.lineHeight);
         if(isNaN(lh)) lh = parseFloat(cs.fontSize) * 1.2;
@@ -669,16 +671,22 @@
     });
 
     function setTypeProgress(item, progress){
-      const count = Math.round(progress * item.lines.length);
+      const total = item.fullText.length;
+      const count = Math.round(progress * total);
       if(count === item.shownCount) return;
       item.shownCount = count;
       if(count <= 0){
         item.el.textContent = '';
+        item.el.classList.remove('typing');
         return;
       }
-      item.el.innerHTML = item.lines.slice(0, count).map(function(l){
-        return l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      }).join('<br>');
+      const slice = item.fullText.slice(0, count)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/
+/g, '<br>');
+      item.el.innerHTML = slice;
+      if(count < total){ item.el.classList.add('typing'); }
+      else { item.el.classList.remove('typing'); }
     }
 
     /* comeca a aparecer quando entra pela base da tela (100% = base), fica cheio quando chega no meio (50%) */
