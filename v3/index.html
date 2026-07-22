@@ -650,7 +650,7 @@
     const GLITCH_DURATION = 1000;
 
     const items = Array.from(nodeList).map(function(el){
-      const isGlitch = (el.tagName.toLowerCase() === 'h2' || el.classList.contains('section-heading') || el.classList.contains('legacy-card'));
+      const isGlitch = (el.tagName.toLowerCase() === 'h2' || el.classList.contains('section-heading') || el.classList.contains('legacy-card') || el.classList.contains('term-label'));
       const item = { el: el, type: isGlitch ? 'glitch' : 'type', progress: -1 };
       if(isGlitch && 'animate' in el){
         el.style.opacity = '0';
