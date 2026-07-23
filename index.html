@@ -645,22 +645,41 @@
 (function(){
   const cover = document.querySelector('.cover-frame');
   if(!cover) return;
-  let mouseX = 0, mouseY = 0;
-  window.addEventListener('mousemove', function(e){
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-  });
-  const start = performance.now();
-  function loop(now){
-    const t = (now - start) / 1000;
-    const bobY = Math.sin(t * 1.3) * 20;
-    const bobRot = Math.sin(t * 1.3) * 1.6;
-    const parallaxX = mouseX * 16;
-    const parallaxY = mouseY * 12;
-    cover.style.transform = 'translate(' + parallaxX.toFixed(2) + 'px,' + (bobY + parallaxY).toFixed(2) + 'px) rotate(' + bobRot.toFixed(2) + 'deg)';
-    requestAnimationFrame(loop);
+  let dragging = false;
+  let startX = 0, startY = 0;
+
+  cover.style.cursor = 'grab';
+  cover.style.touchAction = 'none';
+
+  function onDown(e){
+    dragging = true;
+    cover.style.transition = 'none';
+    cover.style.cursor = 'grabbing';
+    startX = e.clientX;
+    startY = e.clientY;
+    try{ cover.setPointerCapture(e.pointerId); }catch(err){}
   }
-  requestAnimationFrame(loop);
+  function onMove(e){
+    if(!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const offsetX = dx * 0.45;
+    const offsetY = dy * 0.45;
+    const rot = dx * 0.04;
+    cover.style.transform = 'translate(' + offsetX.toFixed(1) + 'px,' + offsetY.toFixed(1) + 'px) rotate(' + rot.toFixed(2) + 'deg)';
+  }
+  function onUp(){
+    if(!dragging) return;
+    dragging = false;
+    cover.style.cursor = 'grab';
+    cover.style.transition = 'transform .7s cubic-bezier(.34,1.56,.64,1)';
+    cover.style.transform = 'translate(0px,0px) rotate(0deg)';
+  }
+
+  cover.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
 })();
 </script>
 </body>
