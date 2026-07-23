@@ -37,16 +37,16 @@
   }
 
   #scroll-progress{
-    position:fixed;top:0;left:0;width:100%;height:6px;
+    position:fixed;top:0;right:0;width:6px;height:100%;
     z-index:60;background:#0a0a0d;
-    border-bottom:1px solid rgba(163,230,53,0.25);
+    border-left:1px solid rgba(163,230,53,0.25);
     pointer-events:none;
   }
   #scroll-progress-bar{
-    height:100%;width:0%;
-    background:repeating-linear-gradient(90deg, var(--green) 0 6px, transparent 6px 9px);
+    width:100%;height:0%;
+    background:repeating-linear-gradient(180deg, var(--green) 0 6px, transparent 6px 9px);
     box-shadow:none;
-    transition:width .12s steps(24);
+    transition:height .12s steps(24);
   }
 
   .noise{
@@ -503,7 +503,7 @@
     const doc = document.documentElement;
     const max = doc.scrollHeight - doc.clientHeight;
     const pct = max > 0 ? (doc.scrollTop / max) * 100 : 0;
-    bar.style.width = pct + '%';
+    bar.style.height = pct + '%';
   }
   window.addEventListener('scroll', update, {passive:true});
   window.addEventListener('resize', update);
