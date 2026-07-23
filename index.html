@@ -124,7 +124,7 @@
     background: linear-gradient(145deg, #1a0a2e, #050506);
     display:flex;align-items:center;justify-content:center;
     overflow:hidden;
-    animation: floatY 4.5s ease-in-out infinite, fadeUp .9s cubic-bezier(.16,1,.3,1) .3s both, badContact 8s linear infinite;
+    animation: fadeUp .9s cubic-bezier(.16,1,.3,1) .3s both, badContact 8s linear infinite;
   }
   .cover-frame img{width:100%;height:100%;object-fit:cover;display:block;}
   .cover-placeholder{
@@ -638,6 +638,29 @@
       }
     });
   }
+})();
+</script>
+
+<script>
+(function(){
+  const cover = document.querySelector('.cover-frame');
+  if(!cover) return;
+  let mouseX = 0, mouseY = 0;
+  window.addEventListener('mousemove', function(e){
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+  const start = performance.now();
+  function loop(now){
+    const t = (now - start) / 1000;
+    const bobY = Math.sin(t * 1.3) * 20;
+    const bobRot = Math.sin(t * 1.3) * 1.6;
+    const parallaxX = mouseX * 16;
+    const parallaxY = mouseY * 12;
+    cover.style.transform = 'translate(' + parallaxX.toFixed(2) + 'px,' + (bobY + parallaxY).toFixed(2) + 'px) rotate(' + bobRot.toFixed(2) + 'deg)';
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
