@@ -36,18 +36,6 @@
     background-size: 40px 40px;
   }
 
-  #scroll-progress{
-    position:fixed;top:0;right:0;width:6px;height:100%;
-    z-index:60;background:#0a0a0d;
-    border-left:1px solid rgba(163,230,53,0.25);
-    pointer-events:none;
-  }
-  #scroll-progress-bar{
-    width:100%;height:0%;
-    background:repeating-linear-gradient(180deg, var(--green) 0 6px, transparent 6px 9px);
-    box-shadow:none;
-    transition:height .12s steps(24);
-  }
 
   .noise{
     position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.03;
@@ -337,7 +325,6 @@
 <body>
 <div class="noise"></div>
 <canvas id="matrix-rain"></canvas>
-<div id="scroll-progress"><div id="scroll-progress-bar"></div></div>
 
 <div class="site-shell">
 
@@ -492,22 +479,6 @@
     requestAnimationFrame(draw);
   }
   draw();
-})();
-</script>
-
-<script>
-(function(){
-  const bar = document.getElementById('scroll-progress-bar');
-  if(!bar) return;
-  function update(){
-    const doc = document.documentElement;
-    const max = doc.scrollHeight - doc.clientHeight;
-    const pct = max > 0 ? (doc.scrollTop / max) * 100 : 0;
-    bar.style.height = pct + '%';
-  }
-  window.addEventListener('scroll', update, {passive:true});
-  window.addEventListener('resize', update);
-  update();
 })();
 </script>
 
